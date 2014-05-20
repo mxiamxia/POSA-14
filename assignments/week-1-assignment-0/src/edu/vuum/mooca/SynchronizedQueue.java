@@ -137,9 +137,9 @@ public class SynchronizedQueue {
             public void run() {
                 for (int i = 0; i < mMaxIterations; i++)
                     try {
-                        mQueue.put(i);
                         if (Thread.interrupted())
                             throw new InterruptedException();
+                        mQueue.put(i);
                     } catch (InterruptedException e) {
                         System.out.println("Thread properly interrupted by "
                                            + e.toString() + " in producerRunnable");
@@ -175,7 +175,7 @@ public class SynchronizedQueue {
                         }
                         Integer result = (Integer) mQueue.take();
 
-                        System.out.println("iteration = " + result);
+                        System.out.println("take iteration = " + result);
                     } catch (InterruptedException e) {
                         System.out.println("Thread properly interrupted by "
                                            + e.toString() + " in consumerRunnable");
@@ -186,7 +186,7 @@ public class SynchronizedQueue {
                         System.out.println("Exception " + e.toString()
                                            + " occurred in consumerRunnable");
                         // Indicate a timeout.
-                        mProducerCounter = TIMEOUT_OCCURRED;
+                        mConsumerCounter = TIMEOUT_OCCURRED;
                         return;
                     } catch (Exception e) {
                         System.out.println("Exception " + e.toString()
@@ -216,21 +216,27 @@ public class SynchronizedQueue {
             // initialization below to create two Java Threads, one
             // that's passed the producerRunnable and the other that's
             // passed the consumerRunnable.
-            Thread consumer = null;
-            Thread producer = null;
+            Thread consumer = new Thread(consumerRunnable);
+            Thread producer = new Thread(producerRunnable);
 
             // TODO - you fill in here to start the threads. More
             // interesting results will occur if you start the
             // consumer first.
+            consumer.start();
+            producer.start();
 
             // Give the Threads a chance to run before interrupting
             // them.
             Thread.sleep(100);
 
             // TODO - you fill in here to interrupt the threads.
+            producer.interrupt();
+            consumer.interrupt();
 
             // TODO - you fill in here to wait for the threads to
             // exit.
+            producer.join();
+            consumer.join();
 
             // Do some sanity checking to see if the Threads work as
             // expected.
